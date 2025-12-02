@@ -364,4 +364,4 @@ async def haven_greeting(session_id: str):
 # --- Static Files ---
 
 # Mount static files AFTER API routes
-app.mount("/", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
