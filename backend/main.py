@@ -175,8 +175,8 @@ def call_llm(system_prompt: str, conversation_history: list, player_message: str
 
 @app.get("/")
 async def root():
-    """Serve the game (or redirect to static)."""
-    return {"message": "The Bunker API. POST /api/new_game to start."}
+    """Serve the game."""
+    return FileResponse("static/index.html")
 
 
 @app.post("/api/new_game", response_model=NewGameResponse)
@@ -361,18 +361,7 @@ async def haven_greeting(session_id: str):
     return {"haven_response": greeting}
 
 
-# --- Static Files (for single-server deployment) ---
-# Uncomment these when you have a static/ folder with frontend
+# --- Static Files ---
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-@app.get("/game")
-async def serve_game():
-    return FileResponse("static/index.html")
-
-
-# --- Run with: uvicorn main:app --reload ---
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Mount static files AFTER API routes
+app.mount("/", StaticFiles(directory="static"), name="static")
