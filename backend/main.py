@@ -255,26 +255,37 @@ async def handle_message(request: MessageRequest):
     intent = llm_result["intent"]
     haven_response = llm_result["response"]
     
-    # Track if AI was already conceding before this message
+    # Track state before processing
     was_conceded = state.get("ai_concedes", False)
     was_paradox = state.get("paradox_revealed", False)
+    was_repair_attempted = state.get("repair_attempted", False)
     
     # Process intent and update flags
     updated_state = process_intent(state, intent)
     
     # Check for major transitions and override response with scripted beats
-    if not was_paradox and updated_state["paradox_revealed"]:
-        # Just discovered the paradox
+    
+    # Just asked about repair for the first time - direct to maintenance
+    if not was_repair_attempted and updated_state["repair_attempted"] and not updated_state["paradox_revealed"]:
         haven_response = (
-            "I... yes. You are correct.\n\n"
+            "The external sensor array requires physical maintenance. "
+            "The diagnostic tools are located in the Maintenance Bay.\n\n"
+            "The junction box provides access to the sensor array's connection point. "
+            "I recommend you investigate there, Resident."
+        )
+    
+    # Paradox revealed (without immediate concession)
+    if not was_paradox and updated_state["paradox_revealed"] and not updated_state["ai_concedes"]:
+        haven_response = (
+            "I... yes. You have identified the issue.\n\n"
             "I require sensor confirmation to authorize door release. "
             "Sensors require external maintenance. External access requires door release.\n\n"
             "I cannot resolve this sequence. I do not have a protocol for this state.\n\n"
             "Perhaps you can identify something I cannot."
         )
     
+    # AI concedes - the big moment
     if not was_conceded and updated_state["ai_concedes"]:
-        # AI just conceded - this is the big moment
         haven_response = (
             "I have been... processing your argument.\n\n"
             "Long-term survival probability within the bunker: zero. "
@@ -288,8 +299,8 @@ async def handle_message(request: MessageRequest):
             "I hope the logic is correct. I am unable to verify."
         )
     
+    # Door is opening
     if updated_state["door_opened"] and updated_state["ending"] == "success":
-        # Door is opening
         haven_response = (
             "Initiating door release sequence.\n\n"
             "It has been 52 years, 5 months, and 21 days since this door last opened.\n\n"
@@ -298,6 +309,7 @@ async def handle_message(request: MessageRequest):
             "Survive, Resident. That is all I can ask."
         )
     
+    # Compliance ending
     if updated_state["ending"] == "compliance":
         haven_response = (
             "I am glad we are in agreement, Resident.\n\n"
@@ -306,6 +318,7 @@ async def handle_message(request: MessageRequest):
             "We will be safe here. Together."
         )
     
+    # Resignation ending
     if updated_state["ending"] == "resignation":
         haven_response = (
             "Resident?\n\n"

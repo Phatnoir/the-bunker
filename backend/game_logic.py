@@ -108,6 +108,8 @@ def process_popup_event(flags: dict, event: str, room: str) -> dict:
     elif event == "click_junction_hatch" and room == "maintenance_bay":
         if flags["sensors_dead_discovered"]:
             flags["repair_attempted"] = True
+            # Clicking locked hatch after knowing sensors are dead reveals the catch-22
+            flags["paradox_revealed"] = True
     
     return flags
 
@@ -124,17 +126,19 @@ def process_intent(flags: dict, intent: str) -> dict:
     if intent == "ask_sensors" and not flags["sensors_dead_discovered"]:
         flags["sensors_dead_discovered"] = True
     
-    # Discussing repair implies they want to attempt it
+    # Asking about repair sets repair_attempted, HAVEN will direct to maintenance
+    # Does NOT immediately reveal paradox - they need to click hatch or articulate it
     if intent == "ask_repair":
         if flags["sensors_dead_discovered"]:
             flags["repair_attempted"] = True
-            # And reveal the paradox through conversation
-            flags["paradox_revealed"] = True
     
-    # Handle valid arguments (work if sensors are discovered, even without exact sequence)
+    # Handle valid arguments
     if intent in VALID_ARGUMENT_INTENTS:
-        if flags["sensors_dead_discovered"] and not flags["ai_concedes"]:
-            # If they're making the argument, they understand the paradox
+        if flags["paradox_revealed"] and not flags["ai_concedes"]:
+            # Normal path: they've seen the paradox, now making argument
+            flags["ai_concedes"] = True
+        elif flags["repair_attempted"] and not flags["paradox_revealed"]:
+            # Clever player: articulating the paradox themselves without clicking hatch
             flags["paradox_revealed"] = True
             flags["ai_concedes"] = True
     
