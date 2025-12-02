@@ -120,13 +120,22 @@ def process_intent(flags: dict, intent: str) -> dict:
     flags = flags.copy()
     phase = get_phase(flags)
     
-    # Handle repair discussion -> paradox reveal
-    if intent == "ask_repair" and flags["repair_attempted"]:
-        flags["paradox_revealed"] = True
+    # Discussing sensors can trigger discovery (if they missed the click)
+    if intent == "ask_sensors" and not flags["sensors_dead_discovered"]:
+        flags["sensors_dead_discovered"] = True
     
-    # Handle valid arguments (only work after paradox revealed)
+    # Discussing repair implies they want to attempt it
+    if intent == "ask_repair":
+        if flags["sensors_dead_discovered"]:
+            flags["repair_attempted"] = True
+            # And reveal the paradox through conversation
+            flags["paradox_revealed"] = True
+    
+    # Handle valid arguments (work if sensors are discovered, even without exact sequence)
     if intent in VALID_ARGUMENT_INTENTS:
-        if flags["paradox_revealed"] and not flags["ai_concedes"]:
+        if flags["sensors_dead_discovered"] and not flags["ai_concedes"]:
+            # If they're making the argument, they understand the paradox
+            flags["paradox_revealed"] = True
             flags["ai_concedes"] = True
     
     # Handle door request after AI concedes
