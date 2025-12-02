@@ -155,6 +155,17 @@ function handleHotspotClick(event, hotspot) {
         return;
     }
     
+    // Special case: clicking door after HAVEN concedes triggers ending
+    if (hotspot.id === "door" && gameState.flags.ai_concedes) {
+        gameState.flags.door_opened = true;
+        gameState.flags.ending = "success";
+        showHavenPopup("Door release confirmed. Goodbye, Resident. Survive.");
+        setTimeout(() => {
+            handleGameOver("success");
+        }, 500);
+        return;
+    }
+    
     // Fire event if this hotspot has one
     if (hotspot.event) {
         firePopupEvent(hotspot.event);
@@ -345,9 +356,14 @@ function triggerSuccessEnding() {
         // Fade to white and show credits
         setTimeout(() => {
             elements.endingScreen.classList.add("fade-to-white");
-        }, 10000);
+        }, 14000);
         
-    }, 2000);
+        // Show restart button after credits
+        setTimeout(() => {
+            document.getElementById("restart-button").classList.add("visible");
+        }, 18000);
+        
+    }, 4000);  // Longer pause to read HAVEN's final message
 }
 
 function triggerComplianceEnding() {
@@ -369,9 +385,13 @@ function triggerComplianceEnding() {
         
         setTimeout(() => {
             elements.endingScreen.classList.add("fade-to-white");
-        }, 10000);
+        }, 12000);
         
-    }, 2000);
+        setTimeout(() => {
+            document.getElementById("restart-button").classList.add("visible");
+        }, 16000);
+        
+    }, 4000);
 }
 
 function triggerResignationEnding() {
@@ -393,9 +413,13 @@ function triggerResignationEnding() {
         
         setTimeout(() => {
             elements.endingScreen.classList.add("fade-to-white");
-        }, 10000);
+        }, 12000);
         
-    }, 2000);
+        setTimeout(() => {
+            document.getElementById("restart-button").classList.add("visible");
+        }, 16000);
+        
+    }, 4000);
 }
 
 // === EVENT LISTENERS ===

@@ -379,19 +379,40 @@ body {
     margin-bottom: 10px;
 }
 
+.credits-name a {
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #999;
+    transition: border-color 0.3s ease;
+}
+
+.credits-name a:hover {
+    border-color: #333;
+}
+
 .credits-spacer {
     height: 30px;
 }
 
-.credits-restart {
-    margin-top: 50px;
+#restart-button {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 14px;
     color: #888;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, opacity 1s ease;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.credits-restart:hover {
+#restart-button.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#restart-button:hover {
     color: #333;
 }
 
