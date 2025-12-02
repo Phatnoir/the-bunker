@@ -364,11 +364,11 @@ async def haven_greeting(session_id: str):
 # --- Static Files (for single-server deployment) ---
 # Uncomment these when you have a static/ folder with frontend
 
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# @app.get("/game")
-# async def serve_game():
-#     return FileResponse("static/index.html")
+@app.get("/game")
+async def serve_game():
+    return FileResponse("static/index.html")
 
 
 # --- Run with: uvicorn main:app --reload ---
