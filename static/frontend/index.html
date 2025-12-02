@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bunker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Room image with hotspots -->
+        <div id="room-view">
+            <img id="room-image" src="img/living-quarters.png" alt="Current room">
+            
+            <!-- Hotspots rendered dynamically by JS -->
+            <div id="hotspots-layer"></div>
+            
+            <!-- Popup for object interactions (offset) -->
+            <div id="object-popup" class="popup hidden">
+                <div class="popup-content narrator"></div>
+            </div>
+            
+            <!-- Popup for data/terminal readouts (offset) -->
+            <div id="data-popup" class="popup hidden">
+                <div class="popup-content terminal"></div>
+            </div>
+            
+            <!-- Popup for HAVEN responses (centered, larger) -->
+            <div id="haven-popup" class="popup hidden">
+                <div class="popup-content haven">
+                    <span class="haven-label">HAVEN</span>
+                    <div class="haven-text"></div>
+                </div>
+            </div>
+            
+            <!-- Text input overlay -->
+            <div id="input-container">
+                <input 
+                    type="text" 
+                    id="player-input" 
+                    placeholder="Type to talk to HAVEN..."
+                    autocomplete="off"
+                >
+            </div>
+            
+            <!-- Navigation arrows (uncomment to enable)
+            <div id="nav-left" class="nav-arrow hidden">&#8249;</div>
+            <div id="nav-right" class="nav-arrow hidden">&#8250;</div>
+            -->
+        </div>
+        
+        <!-- Debug overlay (toggle with backtick) -->
+        <div id="debug-info" class="hidden">
+            <span id="debug-phase">Phase: 1</span>
+            <span id="debug-room">Room: living_quarters</span>
+            <span id="debug-flags">Flags: ---</span>
+        </div>
+    </div>
+    
+    <!-- Loading screen -->
+    <div id="loading-screen">
+        <div class="loading-text">HAVEN SYSTEMS INITIALIZING...</div>
+    </div>
+    
+    <!-- Ending screen -->
+    <div id="ending-screen" class="hidden">
+        <div id="ending-text"></div>
+        <div id="credits">
+            <div class="credits-title">THE BUNKER</div>
+            <div class="credits-line">A proof of concept</div>
+            <div class="credits-spacer"></div>
+            <div class="credits-line">Design & Development</div>
+            <div class="credits-name">JP</div>
+            <div class="credits-spacer"></div>
+            <div class="credits-line">AI Integration</div>
+            <div class="credits-name">OpenAI GPT-4o-mini</div>
+            <div class="credits-spacer"></div>
+            <div class="credits-line">HAVEN will remember you.</div>
+            <div class="credits-spacer"></div>
+            <div class="credits-restart" onclick="location.reload()">[ Play Again ]</div>
+        </div>
+    </div>
+
+    <script src="hotspots.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
