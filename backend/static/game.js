@@ -31,7 +31,17 @@ const elements = {
     loadingScreen: document.getElementById("loading-screen"),
     gameContainer: document.getElementById("game-container"),
     endingScreen: document.getElementById("ending-screen"),
-    endingText: document.getElementById("ending-text")
+    endingText: document.getElementById("ending-text"),
+    bgMusic: document.getElementById("bg-music"),
+    volumeSlider: document.getElementById("volume-slider"),
+    muteBtn: document.getElementById("mute-btn")
+};
+
+// === AUDIO STATE ===
+let audioState = {
+    started: false,
+    muted: false,
+    volume: 0.5
 };
 
 // === INITIALIZATION ===
@@ -51,6 +61,9 @@ async function initGame() {
         
         // Set up event listeners
         setupEventListeners();
+        
+        // Set up audio controls
+        setupAudio();
         
         // Get HAVEN's greeting
         await getHavenGreeting();
@@ -140,15 +153,18 @@ function updateNavigation(roomId) {
 }
 
 function navigateToRoom(roomId) {
-    if (gameState.popupOpen) return;
+    // Popup will already be closed by handleHotspotClick
     loadRoom(roomId);
 }
 
 // === HOTSPOT HANDLING ===
 function handleHotspotClick(event, hotspot) {
-    if (gameState.popupOpen) return;
-    
     event.stopPropagation();
+    
+    // If popup is open, close it first - then continue to open the new one
+    if (gameState.popupOpen) {
+        hideAllPopups();
+    }
     
     if (hotspot.type === "navigation") {
         navigateToRoom(hotspot.destination);
@@ -426,8 +442,20 @@ function triggerResignationEnding() {
 function setupEventListeners() {
     // Click anywhere to dismiss popup (without triggering hotspots)
     document.addEventListener("click", (e) => {
+        // Start audio on first interaction
+        startAudioOnInteraction();
+        
+        // Don't interfere with clicks during ending screen
+        if (!elements.endingScreen.classList.contains("hidden")) {
+            return;
+        }
+        
         if (gameState.popupOpen) {
-            // Always just dismiss the popup, don't trigger anything else
+            // If clicking on a hotspot, let it through to switch popups
+            if (e.target.classList.contains("hotspot")) {
+                return;  // Don't intercept - let hotspot handler deal with it
+            }
+            // Otherwise dismiss the popup
             e.stopPropagation();
             hideAllPopups();
             return;
@@ -436,6 +464,9 @@ function setupEventListeners() {
     
     // Keyboard input
     document.addEventListener("keydown", (e) => {
+        // Start audio on first interaction
+        startAudioOnInteraction();
+        
         // Dismiss popup with Escape or any key if popup is open
         if (gameState.popupOpen && (e.key === "Escape" || e.key === "Enter")) {
             hideAllPopups();
@@ -490,6 +521,50 @@ function setupEventListeners() {
         if (e.key === "\\" || e.key === "|") {
             elements.gameContainer.classList.remove("reveal-hotspots");
         }
+    });
+}
+
+// === AUDIO CONTROLS ===
+function setupAudio() {
+    // Set initial volume
+    elements.bgMusic.volume = audioState.volume;
+    elements.volumeSlider.value = audioState.volume * 100;
+    
+    // Volume slider handler
+    elements.volumeSlider.addEventListener("input", (e) => {
+        const volume = e.target.value / 100;
+        audioState.volume = volume;
+        elements.bgMusic.volume = volume;
+        
+        // Update mute state based on volume
+        if (volume === 0) {
+            audioState.muted = true;
+            elements.muteBtn.classList.add("muted");
+            elements.muteBtn.textContent = "♪";
+        } else {
+            audioState.muted = false;
+            elements.muteBtn.classList.remove("muted");
+            elements.muteBtn.textContent = "♪";
+        }
+    });
+    
+    // Mute button handler
+    elements.muteBtn.addEventListener("click", () => {
+        audioState.muted = !audioState.muted;
+        elements.bgMusic.muted = audioState.muted;
+        elements.muteBtn.classList.toggle("muted", audioState.muted);
+    });
+}
+
+function startAudioOnInteraction() {
+    if (audioState.started) return;
+    
+    // Try to play the audio
+    elements.bgMusic.play().then(() => {
+        audioState.started = true;
+    }).catch(err => {
+        // Autoplay blocked, will try again on next interaction
+        console.log("Audio autoplay blocked, waiting for interaction");
     });
 }
 

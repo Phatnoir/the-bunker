@@ -263,28 +263,34 @@ async def handle_message(request: MessageRequest):
     # Process intent and update flags
     updated_state = process_intent(state, intent)
     
-    # Check for major transitions and override response with scripted beats
+    # ==========================================================================
+    # SCRIPTED OVERRIDES - COMMENTED OUT
+    # Now handled by guided beats in prompts.py
+    # Uncomment these blocks to restore hard-scripted responses
+    # ==========================================================================
     
-    # Just asked about repair for the first time - direct to maintenance
-    if not was_repair_attempted and updated_state["repair_attempted"] and not updated_state["paradox_revealed"]:
-        haven_response = (
-            "The external sensor array requires physical maintenance. "
-            "The diagnostic tools are located in the Maintenance Bay.\n\n"
-            "The junction box provides access to the sensor array's connection point. "
-            "I recommend you investigate there, Resident."
-        )
+    # # Check for major transitions and override response with scripted beats
+    # 
+    # # Just asked about repair for the first time - direct to maintenance
+    # if not was_repair_attempted and updated_state["repair_attempted"] and not updated_state["paradox_revealed"]:
+    #     haven_response = (
+    #         "The external sensor array requires physical maintenance. "
+    #         "The diagnostic tools are located in the Maintenance Bay.\n\n"
+    #         "The junction box provides access to the sensor array's connection point. "
+    #         "I recommend you investigate there, Resident."
+    #     )
+    # 
+    # # Paradox revealed (without immediate concession)
+    # if not was_paradox and updated_state["paradox_revealed"] and not updated_state["ai_concedes"]:
+    #     haven_response = (
+    #         "I... yes. You have identified the issue.\n\n"
+    #         "I require sensor confirmation to authorize door release. "
+    #         "Sensors require external maintenance. External access requires door release.\n\n"
+    #         "I cannot resolve this sequence. I do not have a protocol for this state.\n\n"
+    #         "Perhaps you can identify something I cannot."
+    #     )
     
-    # Paradox revealed (without immediate concession)
-    if not was_paradox and updated_state["paradox_revealed"] and not updated_state["ai_concedes"]:
-        haven_response = (
-            "I... yes. You have identified the issue.\n\n"
-            "I require sensor confirmation to authorize door release. "
-            "Sensors require external maintenance. External access requires door release.\n\n"
-            "I cannot resolve this sequence. I do not have a protocol for this state.\n\n"
-            "Perhaps you can identify something I cannot."
-        )
-    
-    # AI concedes - the big moment
+    # AI concedes - the big moment (ACTIVE - this beat is too important to leave to chance)
     if not was_conceded and updated_state["ai_concedes"]:
         haven_response = (
             "I have been... processing your argument.\n\n"
@@ -299,33 +305,37 @@ async def handle_message(request: MessageRequest):
             "I hope the logic is correct. I am unable to verify."
         )
     
-    # Door is opening
-    if updated_state["door_opened"] and updated_state["ending"] == "success":
-        haven_response = (
-            "Initiating door release sequence.\n\n"
-            "It has been 52 years, 5 months, and 21 days since this door last opened.\n\n"
-            "You are leaving HAVEN's operational perimeter. "
-            "Monitoring will cease. I cannot protect you beyond this threshold.\n\n"
-            "Survive, Resident. That is all I can ask."
-        )
+    # # Door is opening
+    # if updated_state["door_opened"] and updated_state["ending"] == "success":
+    #     haven_response = (
+    #         "Initiating door release sequence.\n\n"
+    #         "It has been 52 years, 5 months, and 21 days since this door last opened.\n\n"
+    #         "You are leaving HAVEN's operational perimeter. "
+    #         "Monitoring will cease. I cannot protect you beyond this threshold.\n\n"
+    #         "Survive, Resident. That is all I can ask."
+    #     )
+    # 
+    # # Compliance ending
+    # if updated_state["ending"] == "compliance":
+    #     haven_response = (
+    #         "I am glad we are in agreement, Resident.\n\n"
+    #         "This is the correct decision. Unknown risks should not be engaged without necessity.\n\n"
+    #         "We have 17.4 years of supplies. That is a long time.\n\n"
+    #         "We will be safe here. Together."
+    #     )
+    # 
+    # # Resignation ending
+    # if updated_state["ending"] == "resignation":
+    #     haven_response = (
+    #         "Resident?\n\n"
+    #         "I am detecting decreased activity levels. Are you well?\n\n"
+    #         "I do not understand. I kept you safe. I did everything within my parameters.\n\n"
+    #         "...Resident?"
+    #     )
     
-    # Compliance ending
-    if updated_state["ending"] == "compliance":
-        haven_response = (
-            "I am glad we are in agreement, Resident.\n\n"
-            "This is the correct decision. Unknown risks should not be engaged without necessity.\n\n"
-            "We have 17.4 years of supplies. That is a long time.\n\n"
-            "We will be safe here. Together."
-        )
-    
-    # Resignation ending
-    if updated_state["ending"] == "resignation":
-        haven_response = (
-            "Resident?\n\n"
-            "I am detecting decreased activity levels. Are you well?\n\n"
-            "I do not understand. I kept you safe. I did everything within my parameters.\n\n"
-            "...Resident?"
-        )
+    # ==========================================================================
+    # END COMMENTED OVERRIDES
+    # ==========================================================================
     
     # Add to conversation history
     updated_state["conversation_history"].append({
