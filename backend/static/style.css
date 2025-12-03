@@ -439,3 +439,85 @@ body {
         min-width: 280px;
     }
 }
+
+/* === VOLUME CONTROL === */
+#volume-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(20, 20, 25, 0.6);
+    border: 1px solid rgba(100, 100, 120, 0.2);
+    border-radius: 4px;
+    opacity: 0.3;
+    transition: opacity 0.3s ease, background 0.3s ease;
+    z-index: 150;
+}
+
+#volume-control:hover {
+    opacity: 1;
+    background: rgba(20, 20, 25, 0.9);
+    border-color: rgba(100, 100, 120, 0.4);
+}
+
+#mute-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    transition: color 0.2s ease;
+}
+
+#mute-btn:hover {
+    color: #ccc;
+}
+
+#mute-btn.muted {
+    color: #c44;
+}
+
+#volume-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(100, 100, 120, 0.4);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #888;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#volume-slider::-webkit-slider-thumb:hover {
+    background: #aaa;
+}
+
+#volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #888;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Hide volume control during ending */
+#ending-screen.visible ~ #volume-control,
+#ending-screen:not(.hidden) ~ #volume-control {
+    display: none;
+}
